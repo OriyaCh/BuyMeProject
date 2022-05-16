@@ -11,6 +11,12 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.w3c.dom.Document;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 public class Main extends BasePage {
 
@@ -21,56 +27,87 @@ public class Main extends BasePage {
     @BeforeClass
     public static void beforeClass() throws Exception {
         String type = getdata("browserType");
-        if(type.equals("Chrome")){
+        if (type.equals("Chrome")) {
             System.setProperty("webdriver.chrome.driver", Constants.CHROMEDRIVER_PATH);
-            driver = new ChromeDriver();
             driver = Tools.DriverSingelton.getDriverInstance();
-        }else if(type.equals("FF")){
+            driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS);
+            driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        } else if (type.equals("FF")) {
             System.setProperty("webdriver.firefox.driver", "C:\\geckodriver\\geckodriver.exe");
-            driver = new FirefoxDriver();
             ExtentSparkReporter htmlReporter = new ExtentSparkReporter("C://Users//extent.html");
             extent.attachReporter(htmlReporter);
             test = extent.createTest("BuyMe Report", "The BuyMe project report");
             test.log(Status.INFO, "before test method");
             // screenshot
-           test.pass("details", MediaEntityBuilder.createScreenCaptureFromPath(takeScreenShot(driver, "picName")).build());
+            test.pass("details", MediaEntityBuilder.createScreenCaptureFromPath(takeScreenShot(driver, "picName")).build());
         }
+        System.setProperty("webdriver.chrome.whitelistedIps", "");
 
     }
 
-
-         @Test
+    @Test
     public void test01_openURL() throws Exception {
             driver.get(getdata("URL"));
             }
 
          @Test
-    public void test02_login () {
-         LoginPage loginPage = new LoginPage();
-         loginPage .login();
+    public void test02_login () throws Exception {
+             try {
+                 LoginPage loginPage = new LoginPage();
+                 loginPage.login();
+                 test.log(Status.INFO, "test login pass successfully");
+             }
+             catch (Exception e){
+                 e.printStackTrace();
+                 test.log(Status.INFO, "test login fail");
+             }
          }
          @Test
-    public void test03_homePageSearch (){
-         HomePage homePage = new HomePage();
-         homePage .pickGift();
-         }
-         @Test
-    public void test04_business (){
-         BusinessPage businessPage = new BusinessPage();
-         businessPage  .business();
-         }
-         @Test
-    public void test05_information () {
-         InformationPage informationPage= new InformationPage();
-         informationPage .detailsInformation();
+    public void test03_homePageSearch () throws  Exception {
+             try {
+                 HomePage homePage = new HomePage();
+                 homePage .pickGift();
+                 test.log(Status.INFO, "test homePage pass successfully");
+             }
+             catch (Exception e){
+                 e.printStackTrace();
+                 test.log(Status.INFO, "test homePage fail"+e.getMessage());
+             }
          }
 
+         @Test
+    public void test04_business () throws  Exception{
+             try {
+                 BusinessPage businessPage = new BusinessPage();
+                 businessPage  .business();
+                 test.log(Status.INFO, "test businessPage pass successfully");
+             }
+             catch (Exception e){
+                 e.printStackTrace();
+                 test.log(Status.INFO, "test businessPage fail" +e.getMessage());
+             }
+         }
+
+         @Test
+    public void test05_information () throws  Exception {
+             try {
+                 InformationPage informationPage= new InformationPage();
+                 informationPage .detailsInformation();
+                 test.log(Status.INFO, "test informationPage pass successfully");
+             }
+             catch (Exception e){
+                 e.printStackTrace();
+                 test.log(Status.INFO, "test informationPage fail" +e.getMessage());
+             }
+         }
     @AfterClass
 
     public static void afterClass() {
         extent.flush();
         driver.quit();
     }
+
+
 
 
 }
